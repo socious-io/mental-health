@@ -41,6 +41,15 @@ services:
     expose:
       - "5071"
 
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    image: moya-web:latest
+    restart: always
+    expose:
+      - "3000"
+
   caddy:
     image: caddy:2-alpine
     restart: always

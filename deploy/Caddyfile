@@ -1,3 +1,7 @@
 api.moya.socious.io {
     reverse_proxy api:5070
 }
+
+moya.socious.io {
+    reverse_proxy web:3000
+}
