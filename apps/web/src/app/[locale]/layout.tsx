@@ -7,6 +7,7 @@ import '../globals.css';
 
 export const metadata: Metadata = {
   title: 'Moya',
+  icons: { icon: '/favicon.svg' },
   description: 'Anonymous mental health support, screening and research — on your terms.',
 };
 
