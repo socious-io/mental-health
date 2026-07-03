@@ -33,6 +33,7 @@ export interface User {
   handle: string;
   identity_verified: boolean;
   locale: string;
+  role: string;
   created_at: string;
 }
 

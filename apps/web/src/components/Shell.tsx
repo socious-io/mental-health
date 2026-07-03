@@ -30,6 +30,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {user.identity_verified && <span className="ml-1.5 text-mint-600">✓</span>}
               </span>
             )}
+            {user?.role === 'user' && (
+              <Link href="/opportunities" className="text-sm font-semibold text-gray-500 hover:text-gray-700">{t('opps')}</Link>
+            )}
+            {user?.role === 'provider' && (
+              <Link href="/portal" className="text-sm font-semibold text-gray-500 hover:text-gray-700">{t('portal')}</Link>
+            )}
+            {user?.role === 'org' && (
+              <Link href="/console" className="text-sm font-semibold text-gray-500 hover:text-gray-700">{t('console')}</Link>
+            )}
             <Link href="/privacy" className="text-sm font-semibold text-gray-500 hover:text-gray-700">{t('privacy')}</Link>
             <LocaleSwitcher />
             {user && (

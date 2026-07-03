@@ -16,4 +16,7 @@ func Init(r *gin.Engine) {
 	screeningsGroup(r)
 	providersGroup(r)
 	bookingsGroup(r)
+	portalGroup(r)
+	orgGroup(r)
+	studiesGroup(r)
 }

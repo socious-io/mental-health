@@ -26,7 +26,10 @@
   },
   "shell": {
     "privacy": "Privacy Ledger",
-    "logout": "Log out"
+    "logout": "Log out",
+    "opps": "Research",
+    "portal": "Portal",
+    "console": "Console"
   },
   "dashboard": {
     "title": "Hello, {handle}",
@@ -148,5 +151,58 @@
     "never_documents": "Your identity documents — they stay in your wallet, on your device",
     "how": "Verification happens in the Socious Wallet app on your device. Moya receives a yes/no proof — nothing else.",
     "openSource": "Every claim on this page is verifiable in our open-source code:"
+  },
+  "opps": {
+    "title": "Research & support opportunities",
+    "subtitle": "Participate anonymously. Rewards are paid from on-chain escrow to your reward address.",
+    "escrowLink": "Escrow funded on-chain — view transaction ↗",
+    "apply": "Present proof & join",
+    "missing_verification": "Needs: account verification",
+    "missing_screening": "Needs: screening credential",
+    "missing_treatment_need": "Needs: Treatment Need Certificate",
+    "progress": "Progress: {n}%",
+    "checkin": "Daily check-in (+10%)",
+    "completed": "Completed — awaiting reward release",
+    "rewarded": "Reward released",
+    "none": "No open studies right now.",
+    "note": "Organizations see only your handle and proof flags — never your identity. Rewards release from an escrow smart contract on Cardano."
+  },
+  "portal": {
+    "title": "Provider Portal",
+    "anonNote": "Patients appear as handles only — you never see names, contacts, or raw questionnaire answers.",
+    "colPatient": "Patient",
+    "colBand": "Band",
+    "colStatus": "Status",
+    "issue": "Issue certificate",
+    "empty": "No booking requests yet.",
+    "issueTitle": "Issue Treatment Need Certificate — {handle}",
+    "issueBody": "Signs a verifiable credential to the patient's wallet. It contains only this attestation — no identity data, no session notes.",
+    "level": "Assessed level",
+    "level_mild": "Mild — support recommended",
+    "level_moderate": "Moderate — treatment recommended",
+    "level_severe": "Severe — treatment strongly recommended",
+    "sign": "Sign & issue",
+    "issued": "Credential issued",
+    "claimHint": "The patient scans this with Socious Wallet to claim (also sent by email).",
+    "close": "Close"
+  },
+  "console": {
+    "title": "Research Console",
+    "subtitle": "Post studies, fund escrow on Cardano, release rewards on completion. Participants are handles — never identities.",
+    "newStudy": "Post a new study",
+    "titleEn": "Title (English)",
+    "titleJa": "Title (Japanese)",
+    "rewardAda": "Reward (ADA):",
+    "target": "Target participants:",
+    "requiresTN": "Require Treatment Need Certificate (clinical studies)",
+    "create": "Create draft",
+    "perParticipant": "participant",
+    "fund": "Fund escrow & publish",
+    "escrowTx": "Escrow transaction ↗",
+    "participants": "Participants",
+    "noParticipants": "No participants yet.",
+    "release": "Release reward",
+    "released": "Reward released",
+    "note": "Funding locks the reward at the escrow validator; release pays the participant from escrow. Both are public Cardano transactions."
   }
 }

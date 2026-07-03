@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS treatment_credentials;
+DROP TABLE IF EXISTS participations;
+DROP TABLE IF EXISTS studies;
+ALTER TABLE users DROP COLUMN IF EXISTS role;

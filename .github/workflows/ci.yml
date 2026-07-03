@@ -32,4 +32,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: node --check apps/chain-runner/src/index.mjs
+      - run: node --check apps/chain-runner/src/index.js

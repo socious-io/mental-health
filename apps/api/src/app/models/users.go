@@ -14,6 +14,7 @@ type User struct {
 	IdentityVerified bool       `db:"identity_verified" json:"identity_verified"`
 	VerifiedAt       *time.Time `db:"verified_at" json:"verified_at,omitempty"`
 	Locale           string     `db:"locale" json:"locale"`
+	Role             string     `db:"role" json:"role"`
 	CreatedAt        time.Time  `db:"created_at" json:"created_at"`
 }
 
