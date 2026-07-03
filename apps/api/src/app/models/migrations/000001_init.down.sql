@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS verifications;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS screenings;
+DROP TABLE IF EXISTS providers;
+DROP TABLE IF EXISTS users;

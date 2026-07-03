@@ -1,0 +1,3 @@
+[submodule "contracts/aiken-contracts"]
+	path = contracts/aiken-contracts
+	url = https://github.com/socious-io/aiken-contracts.git

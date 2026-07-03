@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.open-next/
+dist/
+build/
+*.log
+.env
+.env.*
+!.env.example
+config.yml
+!config.example.yml
+.DS_Store
+coverage/
+apps/api/bin/
+*.sk
+*.skey
+wallets/

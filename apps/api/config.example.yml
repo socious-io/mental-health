@@ -1,0 +1,17 @@
+env: development
+port: 5070
+secret: change-me-long-random-string
+database:
+  url: postgres://moya:moya@localhost:5432/moya?sslmode=disable
+cors:
+  origins:
+    - http://localhost:3000
+    - https://moya.socious.io
+shin:
+  host: https://api.shinid.com
+  email: ""
+  password: ""
+  apikey: ""
+  apphost: https://app.shinid.com
+payment:
+  enabled: false

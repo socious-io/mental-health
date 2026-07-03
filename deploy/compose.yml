@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: moya
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: moya
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moya"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ghcr.io/socious-io/moya-api:latest
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      CONFIG_PATH: /app/config.yml
+    volumes:
+      - /etc/moya/config.yml:/app/config.yml:ro
+    ports:
+      - "127.0.0.1:5070:5070"
+
+  chain-runner:
+    image: ghcr.io/socious-io/moya-chain-runner:latest
+    restart: always
+    environment:
+      CHAIN_RUNNER_SECRET: ${CHAIN_RUNNER_SECRET:?set in .env}
+    volumes:
+      - /etc/moya/wallets:/app/wallets:ro
+    expose:
+      - "5071"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
