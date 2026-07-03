@@ -1,0 +1,7 @@
+INSERT INTO providers (slug, name_en, name_ja, modality, languages, cost_band, bands, description_en, description_ja) VALUES
+('sato-cbt', 'Dr. A. Sato — Online CBT', '佐藤医師のオンラインCBT', 'online', '{en,ja}', 'research_covered', '{mild,moderate,moderately_severe}', 'Structured cognitive behavioural therapy, evening slots, English or Japanese.', '認知行動療法（CBT）。夜間枠あり。日本語・英語対応。'),
+('mindspace', 'Mind Space — Guided self-help', 'マインドスペース（ガイド付きセルフヘルプ）', 'online', '{ja,en}', 'low_cost', '{minimal,mild,moderate}', 'Self-paced programme with weekly counsellor check-ins.', '週1回のカウンセラー面談つきセルフペース・プログラム。'),
+('tanaka-counsel', 'K. Tanaka, CP — Video counselling', '田中臨床心理士のビデオカウンセリング', 'online', '{ja}', 'standard', '{moderate,moderately_severe,severe}', 'Licensed clinical psychologist, video sessions.', '臨床心理士によるビデオ面談。'),
+('kokoro-clinic', 'Kokoro Clinic Umeda', 'こころクリニック梅田', 'in_person', '{ja}', 'standard', '{moderate,moderately_severe,severe}', 'Psychiatry clinic, Osaka. Anonymous intake supported.', '大阪・梅田の心療内科。匿名での初診相談に対応。'),
+('peer-circle', 'Peer Circle — moderated groups', 'ピアサークル（モデレーター付きグループ）', 'online', '{ja,en}', 'low_cost', '{minimal,mild}', 'Moderated peer-support groups, evenings.', 'モデレーター付きのピアサポートグループ。夜開催。'),
+('helio-tele', 'Helio Telepsychiatry', 'ヘリオ遠隔精神科', 'online', '{en}', 'standard', '{moderately_severe,severe}', 'Psychiatrist-led telehealth, same-week appointments.', '精神科医による遠隔診療。今週中の予約可。');

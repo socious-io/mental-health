@@ -26,6 +26,17 @@ type Config struct {
 	Payment struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"payment"`
+	Demo struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"demo"`
+	Verification struct {
+		ShinVerificationID string `yaml:"shin_verification_id"`
+	} `yaml:"verification"`
+	Schemas struct {
+		Over18          string `yaml:"over18"`
+		ScreeningResult string `yaml:"screening_result"`
+		TreatmentNeed   string `yaml:"treatment_need"`
+	} `yaml:"schemas"`
 }
 
 var C Config
