@@ -1,0 +1,32 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency: deploy-prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on VM over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 25m
+          script: |
+            set -e
+            if [ ! -d ~/mental-health ]; then
+              git clone --recurse-submodules https://github.com/socious-io/mental-health.git ~/mental-health
+            fi
+            cd ~/mental-health
+            git fetch origin main && git reset --hard origin/main && git submodule update --init
+            cd deploy
+            docker compose --env-file /etc/moya/compose.env -f compose.yml build --pull
+            docker compose --env-file /etc/moya/compose.env -f compose.yml up -d --remove-orphans
+            docker system prune -f > /dev/null
+            sleep 5
+            curl -fsS http://127.0.0.1:5070/ping

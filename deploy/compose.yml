@@ -15,7 +15,9 @@ services:
       retries: 10
 
   api:
-    image: ghcr.io/socious-io/moya-api:latest
+    build:
+      context: ../apps/api
+    image: moya-api:latest
     restart: always
     depends_on:
       postgres:
@@ -28,7 +30,9 @@ services:
       - "127.0.0.1:5070:5070"
 
   chain-runner:
-    image: ghcr.io/socious-io/moya-chain-runner:latest
+    build:
+      context: ../apps/chain-runner
+    image: moya-chain-runner:latest
     restart: always
     environment:
       CHAIN_RUNNER_SECRET: ${CHAIN_RUNNER_SECRET:?set in .env}
