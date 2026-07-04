@@ -152,3 +152,8 @@ func SetParticipationEscrow(id uuid.UUID, escrowTx, escrowUtxo, bindTx string) e
 	_, err := DB.Exec(`UPDATE participations SET escrow_tx=$2, escrow_utxo=$3, bind_tx=$4 WHERE id=$1`, id, escrowTx, escrowUtxo, bindTx)
 	return err
 }
+
+func DeleteParticipation(id uuid.UUID) error {
+	_, err := DB.Exec(`DELETE FROM participations WHERE id=$1`, id)
+	return err
+}

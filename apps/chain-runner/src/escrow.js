@@ -135,6 +135,7 @@ async function initiate({ lovelace }) {
     .complete();
   const signed = await org.signTx(txb.txHex);
   const txHash = await org.submitTx(signed);
+  await waitForUtxo(bf, txHash, 0); // settle before any further org spend
   return { tx_hash: txHash, utxo: `${txHash}#0`, escrow_address: escrowAddress(), org_addr: orgAddr };
 }
 
@@ -149,7 +150,6 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     if (total < 5_000_000) {
       const pAddr0 = (await participant.getUsedAddresses())[0] ?? (await participant.getUnusedAddresses())[0];
       await fundInternal({ to: pAddr0, lovelace: 6_000_000 });
-      await new Promise((r) => setTimeout(r, 40_000)); // wait for confirmation
     }
   }
   const admin = await loadOrCreateWallet('admin');
@@ -226,6 +226,7 @@ async function fundInternal({ to, lovelace }) {
     .complete();
   const signed = await org.signTx(txb.txHex);
   const txHash = await org.submitTx(signed);
+  await waitForUtxo(bf, txHash, 0);
   return { tx_hash: txHash };
 }
 module.exports.fund = fundInternal;

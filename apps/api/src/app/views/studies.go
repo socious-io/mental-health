@@ -103,6 +103,7 @@ func studiesGroup(r *gin.Engine) {
 				OrgAddr string `json:"org_addr"`
 			}
 			if err := app.ChainRunner("/escrow/initiate", gin.H{"lovelace": s.RewardLovelace}, &init); err != nil {
+				models.DeleteParticipation(p.ID)
 				c.JSON(http.StatusBadGateway, gin.H{"error": "escrow initiate: " + err.Error()})
 				return
 			}
@@ -116,6 +117,7 @@ func studiesGroup(r *gin.Engine) {
 				"org_addr":           init.OrgAddr,
 				"lovelace":           s.RewardLovelace,
 			}, &bound); err != nil {
+				models.DeleteParticipation(p.ID)
 				c.JSON(http.StatusBadGateway, gin.H{"error": "escrow bind: " + err.Error()})
 				return
 			}
