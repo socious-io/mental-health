@@ -45,17 +45,28 @@ func verificationsGroup(r *gin.Engine) {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "shin: " + err.Error()})
 			return
 		}
-		connectURL, err := shin.IndividualConnect(ind.ID)
+		shortURL, err := shin.IndividualConnect(ind.ID)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "shin connect: " + err.Error()})
 			return
 		}
-		v, err := models.UpsertVerification(user.ID, shinVID, ind.ID, connectURL)
+		longURL, err := shin.ResolveShort(shortURL)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "shin fetch: " + err.Error()})
+			return
+		}
+		walletURL, _, err := buildWalletConnectURL(longURL, ind.ID, c.Request.Host)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "connect rewrite: " + err.Error()})
+			return
+		}
+		v, err := models.UpsertVerification(user.ID, shinVID, ind.ID, walletURL)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal"})
 			return
 		}
-		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": connectURL})
+		qrURL := "https://" + c.Request.Host + "/wallet/qr/" + v.ID.String()
+		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": qrURL})
 	})
 
 	g.GET("", func(c *gin.Context) {

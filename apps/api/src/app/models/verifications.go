@@ -26,6 +26,12 @@ func UpsertVerification(userID uuid.UUID, shinID, individualID, connectURL strin
 	return v, err
 }
 
+func GetVerificationByID(id uuid.UUID) (*Verification, error) {
+	v := new(Verification)
+	err := DB.Get(v, `SELECT * FROM verifications WHERE id=$1`, id)
+	return v, err
+}
+
 func LatestVerification(userID uuid.UUID) (*Verification, error) {
 	v := new(Verification)
 	err := DB.Get(v, `SELECT * FROM verifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1`, userID)

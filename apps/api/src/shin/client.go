@@ -214,3 +214,30 @@ func IndividualConnect(individualID string) (string, error) {
 func IndividualVerify(individualID string) {
 	_ = request("GET", "/verifications/"+individualID+"/verify", "", nil, nil)
 }
+
+// ResolveShort resolves a Shin short link the way the wallet scanner does:
+// GET {short}/fetch -> {"long_url": "..."}.
+func ResolveShort(shortURL string) (string, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Get(shortURL + "/fetch")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	var out struct {
+		LongURL string `json:"long_url"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", err
+	}
+	if out.LongURL == "" {
+		return "", fmt.Errorf("short link resolved to empty long_url")
+	}
+	return out.LongURL, nil
+}
+
+// IndividualCallback relays the wallet's post-connect callback to Shin,
+// which sends the proof request over the established DIDComm connection.
+func IndividualCallback(individualID string) error {
+	return request("GET", "/verifications/"+individualID+"/callback", "", nil, nil)
+}
