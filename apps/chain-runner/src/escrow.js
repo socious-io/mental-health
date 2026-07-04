@@ -79,6 +79,19 @@ function mAddress(bech32) {
 }
 
 const lovelaceValue = (n) => [{ unit: 'lovelace', quantity: String(n) }];
+
+// Blockfrost can't serve a UTxO until its tx is on-chain — poll up to ~4 min.
+async function waitForUtxo(bf, txHash, outputIndex) {
+  for (let i = 0; i < 24; i++) {
+    try {
+      const utxos = await bf.fetchUTxOs(txHash);
+      const u = utxos.find((x) => x.input.outputIndex === Number(outputIndex));
+      if (u) return u;
+    } catch { /* not yet indexed */ }
+    await new Promise((r) => setTimeout(r, 10_000));
+  }
+  throw new Error(`utxo ${txHash}#${outputIndex} not found after waiting`);
+}
 // MValue for datum: Pairs<PolicyId, Pairs<AssetName, Int>> — ADA = "" / ""
 const mValueLovelace = (n) => [[ '', [[ '', BigInt(n) ]] ]];
 
@@ -143,8 +156,7 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
   const pAddr = (await participant.getUsedAddresses())[0] ?? (await participant.getUnusedAddresses())[0];
   const adminAddr = (await admin.getUsedAddresses())[0] ?? (await admin.getUnusedAddresses())[0];
   const [txHash, idxStr] = escrow_utxo.split('#');
-  const scriptUtxos = await bf.fetchUTxOs(txHash);
-  const sUtxo = scriptUtxos.find((u) => u.input.outputIndex === Number(idxStr));
+  const sUtxo = await waitForUtxo(bf, txHash, idxStr);
   const pUtxos = await participant.getUtxos();
   const { code } = escrowScript();
   const txb = await newTxBuilder(bf);
@@ -171,8 +183,7 @@ async function release({ escrow_utxo, reward_address, lovelace }) {
   const admin = await loadOrCreateWallet('admin');
   const adminAddr = (await admin.getUsedAddresses())[0] ?? (await admin.getUnusedAddresses())[0];
   const [txHash, idxStr] = escrow_utxo.split('#');
-  const scriptUtxos = await bf.fetchUTxOs(txHash);
-  const sUtxo = scriptUtxos.find((u) => u.input.outputIndex === Number(idxStr));
+  const sUtxo = await waitForUtxo(bf, txHash, idxStr);
   const aUtxos = await admin.getUtxos();
   const { code } = escrowScript();
   const txb = await newTxBuilder(bf);
