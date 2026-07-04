@@ -82,6 +82,25 @@ const emptyAssets = [];
 
 const lovelaceValue = (n) => [{ unit: 'lovelace', quantity: String(n) }];
 
+// The address-utxo view lags the tx view — wait until the wallet's own utxo
+// set reflects a tx before building the next spend from it.
+async function waitForAddressSync(wallet, txHash) {
+  for (let i = 0; i < 30; i++) {
+    const utxos = await wallet.getUtxos();
+    if (utxos.some((u) => u.input.txHash === txHash)) return utxos;
+    await new Promise((r) => setTimeout(r, 5_000));
+  }
+  throw new Error(`address view did not sync tx ${txHash}`);
+}
+
+function pickCollateral(utxos) {
+  const pure = utxos.filter(
+    (u) => u.output.amount.length === 1 && Number(u.output.amount[0].quantity) >= 3_000_000,
+  );
+  if (!pure.length) throw new Error('no collateral-suitable utxo');
+  return pure.sort((a, b) => Number(a.output.amount[0].quantity) - Number(b.output.amount[0].quantity))[0];
+}
+
 // Blockfrost can't serve a UTxO until its tx is on-chain — poll up to ~4 min.
 async function waitForUtxo(bf, txHash, outputIndex) {
   for (let i = 0; i < 24; i++) {
@@ -135,7 +154,8 @@ async function initiate({ lovelace }) {
     .complete();
   const signed = await org.signTx(txb.txHex);
   const txHash = await org.submitTx(signed);
-  await waitForUtxo(bf, txHash, 0); // settle before any further org spend
+  await waitForUtxo(bf, txHash, 0);
+  await waitForAddressSync(org, txHash); // settle before any further org spend
   return { tx_hash: txHash, utxo: `${txHash}#0`, escrow_address: escrowAddress(), org_addr: orgAddr };
 }
 
@@ -149,7 +169,8 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     const total = have.reduce((n, u) => n + Number(u.output.amount.find((a) => a.unit === 'lovelace')?.quantity || 0), 0);
     if (total < 5_000_000) {
       const pAddr0 = (await participant.getUsedAddresses())[0] ?? (await participant.getUnusedAddresses())[0];
-      await fundInternal({ to: pAddr0, lovelace: 6_000_000 });
+      const f = await fundInternal({ to: pAddr0, lovelace: 6_000_000 });
+      await waitForAddressSync(participant, f.tx_hash);
     }
   }
   const admin = await loadOrCreateWallet('admin');
@@ -158,6 +179,8 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
   const [txHash, idxStr] = escrow_utxo.split('#');
   const sUtxo = await waitForUtxo(bf, txHash, idxStr);
   const pUtxos = await participant.getUtxos();
+  const col = pickCollateral(pUtxos);
+  const spendable = pUtxos.filter((u) => !(u.input.txHash === col.input.txHash && u.input.outputIndex === col.input.outputIndex));
   const { code } = escrowScript();
   const txb = await newTxBuilder(bf);
   await txb
@@ -166,10 +189,11 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     .txInInlineDatumPresent()
     .txInRedeemerValue(recipientDepositRedeemer(pAddr), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
+    .txInCollateral(col.input.txHash, col.input.outputIndex, col.output.amount, col.output.address)
     .txOut(escrowAddress(), sUtxo.output.amount)
     .txOutInlineDatumValue(activeDatum(org_addr, lovelace, pAddr, adminAddr, FEE_LOVELACE), 'JSON')
     .changeAddress(pAddr)
-    .selectUtxosFrom(pUtxos)
+    .selectUtxosFrom(spendable)
     .requiredSignerHash(deserializeAddress(pAddr).pubKeyHash)
     .complete();
   const signed = await participant.signTx(txb.txHex);
@@ -184,7 +208,17 @@ async function release({ escrow_utxo, reward_address, lovelace }) {
   const adminAddr = (await admin.getUsedAddresses())[0] ?? (await admin.getUnusedAddresses())[0];
   const [txHash, idxStr] = escrow_utxo.split('#');
   const sUtxo = await waitForUtxo(bf, txHash, idxStr);
-  const aUtxos = await admin.getUtxos();
+  let aUtxos = await admin.getUtxos();
+  if (aUtxos.length < 2) {
+    // self-split so we have a dedicated collateral utxo
+    const txbS = await newTxBuilder(bf);
+    await txbS.txOut(adminAddr, [{ unit: 'lovelace', quantity: '3500000' }]).changeAddress(adminAddr).selectUtxosFrom(aUtxos).complete();
+    const sTx = await admin.submitTx(await admin.signTx(txbS.txHex));
+    await waitForUtxo(bf, sTx, 0);
+    aUtxos = await waitForAddressSync(admin, sTx);
+  }
+  const col = pickCollateral(aUtxos);
+  const spendable = aUtxos.filter((u) => !(u.input.txHash === col.input.txHash && u.input.outputIndex === col.input.outputIndex));
   const { code } = escrowScript();
   const txb = await newTxBuilder(bf);
   await txb
@@ -193,10 +227,11 @@ async function release({ escrow_utxo, reward_address, lovelace }) {
     .txInInlineDatumPresent()
     .txInRedeemerValue(completeRedeemer(), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
+    .txInCollateral(col.input.txHash, col.input.outputIndex, col.output.amount, col.output.address)
     .txOut(reward_address, lovelaceValue(lovelace))
     .txOut(adminAddr, lovelaceValue(FEE_LOVELACE))
     .changeAddress(adminAddr)
-    .selectUtxosFrom(aUtxos)
+    .selectUtxosFrom(spendable)
     .requiredSignerHash(deserializeAddress(adminAddr).pubKeyHash)
     .complete();
   const signed = await admin.signTx(txb.txHex);
@@ -221,12 +256,14 @@ async function fundInternal({ to, lovelace }) {
   const txb = await newTxBuilder(bf);
   await txb
     .txOut(to, [{ unit: 'lovelace', quantity: String(lovelace) }])
+    .txOut(to, [{ unit: 'lovelace', quantity: '3500000' }]) // dedicated collateral utxo
     .changeAddress(orgAddr)
     .selectUtxosFrom(utxos)
     .complete();
   const signed = await org.signTx(txb.txHex);
   const txHash = await org.submitTx(signed);
   await waitForUtxo(bf, txHash, 0);
+  await waitForAddressSync(org, txHash);
   return { tx_hash: txHash };
 }
 module.exports.fund = fundInternal;
