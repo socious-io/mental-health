@@ -29,6 +29,8 @@ type Participation struct {
 	UserID        uuid.UUID `db:"user_id" json:"-"`
 	Status        string    `db:"status" json:"status"`
 	BindTx        *string   `db:"bind_tx" json:"bind_tx,omitempty"`
+	EscrowTx      *string   `db:"escrow_tx" json:"escrow_tx,omitempty"`
+	EscrowUtxo    *string   `db:"escrow_utxo" json:"escrow_utxo,omitempty"`
 	ReleaseTx     *string   `db:"release_tx" json:"release_tx,omitempty"`
 	RewardAddress *string   `db:"reward_address" json:"reward_address,omitempty"`
 	Progress      int       `db:"progress" json:"progress"`
@@ -144,4 +146,9 @@ func ProviderBookings(providerUserID uuid.UUID) ([]struct {
 		WHERE pr.slug = (SELECT handle FROM users WHERE id=$1)
 		ORDER BY b.created_at DESC`, providerUserID)
 	return out, err
+}
+
+func SetParticipationEscrow(id uuid.UUID, escrowTx, escrowUtxo, bindTx string) error {
+	_, err := DB.Exec(`UPDATE participations SET escrow_tx=$2, escrow_utxo=$3, bind_tx=$4 WHERE id=$1`, id, escrowTx, escrowUtxo, bindTx)
+	return err
 }

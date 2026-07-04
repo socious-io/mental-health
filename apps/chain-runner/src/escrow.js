@@ -122,13 +122,23 @@ async function initiate({ lovelace }) {
     .complete();
   const signed = await org.signTx(txb.txHex);
   const txHash = await org.submitTx(signed);
-  return { tx_hash: txHash, utxo: `${txHash}#0`, escrow_address: escrowAddress() };
+  return { tx_hash: txHash, utxo: `${txHash}#0`, escrow_address: escrowAddress(), org_addr: orgAddr };
 }
 
 // Step 2 — bind participant (RecipientDeposit, recipient deposits nothing).
 async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
   const bf = provider();
   const participant = await loadOrCreateWallet(participant_wallet);
+  // Ensure the participant custodial wallet can pay fees + provide collateral.
+  {
+    const have = await participant.getUtxos();
+    const total = have.reduce((n, u) => n + Number(u.output.amount.find((a) => a.unit === 'lovelace')?.quantity || 0), 0);
+    if (total < 5_000_000) {
+      const pAddr0 = (await participant.getUsedAddresses())[0] ?? (await participant.getUnusedAddresses())[0];
+      await fundInternal({ to: pAddr0, lovelace: 6_000_000 });
+      await new Promise((r) => setTimeout(r, 40_000)); // wait for confirmation
+    }
+  }
   const admin = await loadOrCreateWallet('admin');
   const pAddr = (await participant.getUsedAddresses())[0] ?? (await participant.getUnusedAddresses())[0];
   const adminAddr = (await admin.getUsedAddresses())[0] ?? (await admin.getUnusedAddresses())[0];
@@ -189,3 +199,22 @@ module.exports = {
   recipientDepositRedeemer, cancelRedeemer, completeRedeemer,
   initiate, bind, release,
 };
+
+// Simple payment from the org custodial wallet (funds admin/participant wallets
+// for fees + collateral on preprod).
+async function fundInternal({ to, lovelace }) {
+  const bf = provider();
+  const org = await loadOrCreateWallet('org');
+  const orgAddr = (await org.getUsedAddresses())[0] ?? (await org.getUnusedAddresses())[0];
+  const utxos = await org.getUtxos();
+  const txb = await newTxBuilder(bf);
+  await txb
+    .txOut(to, [{ unit: 'lovelace', quantity: String(lovelace) }])
+    .changeAddress(orgAddr)
+    .selectUtxosFrom(utxos)
+    .complete();
+  const signed = await org.signTx(txb.txHex);
+  const txHash = await org.submitTx(signed);
+  return { tx_hash: txHash };
+}
+module.exports.fund = fundInternal;

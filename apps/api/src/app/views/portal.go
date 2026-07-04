@@ -161,25 +161,11 @@ func orgGroup(r *gin.Engine) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
-		if !config.C.Payment.Enabled {
-			// Chain disabled (no Blockfrost key / ADA yet): mark recruiting, no tx.
-			models.SetStudyEscrow(id, "", "", "RECRUITING")
-			c.JSON(http.StatusOK, gin.H{"status": "RECRUITING", "note": "payment disabled — escrow deferred"})
-			return
-		}
-		var out struct {
-			TxHash string `json:"tx_hash"`
-			Utxo   string `json:"utxo"`
-		}
-		if err := app.ChainRunner("/escrow/initiate", gin.H{
-			"study_id": s.ID.String(),
-			"lovelace": s.RewardLovelace,
-		}, &out); err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
-			return
-		}
-		models.SetStudyEscrow(id, out.TxHash, out.Utxo, "RECRUITING")
-		c.JSON(http.StatusOK, gin.H{"status": "RECRUITING", "escrow_tx": out.TxHash})
+		// Escrow is locked per participation at apply time (the validator binds
+		// one recipient per box) — publishing just opens recruitment.
+		_ = s
+		models.SetStudyEscrow(id, "", "", "RECRUITING")
+		c.JSON(http.StatusOK, gin.H{"status": "RECRUITING"})
 	})
 
 	g.GET("/studies/:id/participants", func(c *gin.Context) {
@@ -204,9 +190,9 @@ func orgGroup(r *gin.Engine) {
 			return
 		}
 		s, _ := models.GetStudy(p.StudyID)
-		if !config.C.Payment.Enabled {
+		if !config.C.Payment.Enabled || p.EscrowUtxo == nil {
 			models.UpdateParticipation(id, "REWARDED", 100, nil, nil)
-			c.JSON(http.StatusOK, gin.H{"status": "REWARDED", "note": "payment disabled — release deferred"})
+			c.JSON(http.StatusOK, gin.H{"status": "REWARDED", "note": "no on-chain escrow for this participation"})
 			return
 		}
 		var out struct {
@@ -214,7 +200,7 @@ func orgGroup(r *gin.Engine) {
 		}
 		if err := app.ChainRunner("/escrow/release", gin.H{
 			"study_id":       s.ID.String(),
-			"escrow_utxo":    s.EscrowUtxo,
+			"escrow_utxo":    *p.EscrowUtxo,
 			"reward_address": p.RewardAddress,
 			"lovelace":       s.RewardLovelace,
 		}, &out); err != nil {

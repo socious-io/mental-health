@@ -3,7 +3,7 @@
 // users and orgs never touch wallets (Moya is a web2 app).
 const { serve } = require('@hono/node-server');
 const { Hono } = require('hono');
-const { initiate, bind, release, walletAddressOffline, escrowAddress, NETWORK } = require('./escrow.js');
+const { initiate, bind, release, fund, walletAddressOffline, escrowAddress, NETWORK } = require('./escrow.js');
 
 const app = new Hono();
 const SECRET = process.env.CHAIN_RUNNER_SECRET || '';
@@ -27,6 +27,16 @@ app.post('/wallets/new', async (c) => {
   if (!user_id) return c.json({ error: 'user_id required' }, 400);
   const address = await walletAddressOffline(`users/${user_id}`);
   return c.json({ address });
+});
+
+app.post('/wallets/fund', async (c) => {
+  try {
+    const body = await c.req.json();
+    return c.json(await fund(body));
+  } catch (e) {
+    console.error('fund:', e);
+    return c.json({ error: String(e.message || e) }, 502);
+  }
 });
 
 app.post('/escrow/initiate', async (c) => {

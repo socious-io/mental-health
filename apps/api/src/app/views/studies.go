@@ -94,8 +94,36 @@ func studiesGroup(r *gin.Engine) {
 			c.JSON(http.StatusConflict, gin.H{"error": "already applied"})
 			return
 		}
+		if config.C.Payment.Enabled {
+			// Lock this participant's reward at the escrow validator, then bind
+			// them as recipient (RecipientDeposit) — one escrow box per participation.
+			var init struct {
+				TxHash  string `json:"tx_hash"`
+				Utxo    string `json:"utxo"`
+				OrgAddr string `json:"org_addr"`
+			}
+			if err := app.ChainRunner("/escrow/initiate", gin.H{"lovelace": s.RewardLovelace}, &init); err != nil {
+				c.JSON(http.StatusBadGateway, gin.H{"error": "escrow initiate: " + err.Error()})
+				return
+			}
+			var bound struct {
+				TxHash string `json:"tx_hash"`
+				Utxo   string `json:"utxo"`
+			}
+			if err := app.ChainRunner("/escrow/bind", gin.H{
+				"escrow_utxo":        init.Utxo,
+				"participant_wallet": "users/" + user.ID.String(),
+				"org_addr":           init.OrgAddr,
+				"lovelace":           s.RewardLovelace,
+			}, &bound); err != nil {
+				c.JSON(http.StatusBadGateway, gin.H{"error": "escrow bind: " + err.Error()})
+				return
+			}
+			models.SetParticipationEscrow(p.ID, init.TxHash, bound.Utxo, bound.TxHash)
+		}
 		models.UpdateParticipation(p.ID, "ACTIVE", 0, nil, nil)
-		c.JSON(http.StatusCreated, p)
+		p2, _ := models.GetParticipation(p.ID)
+		c.JSON(http.StatusCreated, p2)
 	})
 
 	g.GET("/mine", func(c *gin.Context) {
