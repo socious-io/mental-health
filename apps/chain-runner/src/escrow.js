@@ -18,6 +18,7 @@ const {
   pubKeyAddress,
   value,
   DEFAULT_REDEEMER_BUDGET,
+  applyParamsToScript,
 } = require('@meshsdk/core');
 const { deserializeAddress } = require('@meshsdk/core');
 
@@ -30,7 +31,9 @@ const NETWORK_ID = NETWORK === 'mainnet' ? 1 : 0;
 
 function escrowScript() {
   const v = plutus.validators.find((x) => x.title === 'escrow.escrow');
-  return { code: v.compiledCode, hash: v.hash, version: 'V2' };
+  // applyParamsToScript with no params performs the required double-CBOR
+  // encoding — raw blueprint compiledCode is a malformed witness on-chain.
+  return { code: applyParamsToScript(v.compiledCode, []), hash: v.hash, version: 'V2' };
 }
 
 function escrowAddress() {
