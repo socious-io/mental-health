@@ -53,7 +53,6 @@
   },
   "verify": {
     "title": "Verify with Socious Wallet",
-    "body": "Step 2 of 2 — present your credential. Your wallet proves you hold an over-18 credential; your identity stays on your device.",
     "openWallet": "Open Socious Wallet",
     "waiting": "Waiting for your wallet…",
     "noWallet": "Don't have the wallet yet?",
@@ -61,14 +60,10 @@
     "done": "You're verified",
     "error": "Something went wrong. Please try again.",
     "close": "Close",
-    "attestBody": "First, claim your eligibility credential — a verifiable credential in your Socious Wallet proving you're over 18. You only do this once.",
-    "attestLabel": "I confirm that I am 18 years of age or older.",
-    "attestCta": "Issue my eligibility credential",
-    "attestNote": "MVP note: eligibility is self-attested; the credential mechanics are real and this slot is designed for a production ID-verification provider.",
-    "claimBody": "Step 1 of 2 — add the credential to your wallet:",
     "cameraHint": "📷 Scan with your phone camera (not the wallet's scanner) — the page will hand off to Socious Wallet.",
     "orOpenLink": "…or open this link on your phone (also sent by email)",
-    "claimDone": "I've added it to my wallet — continue"
+    "oneQrBody": "One scan proves two facts at once: you completed identity verification in Socious Wallet, and you are over 18. Nothing else is shared with Moya.",
+    "kycPrereq": "Prerequisite: complete identity verification inside the Socious Wallet app first (Wallet → Verify). If you haven't, the wallet will offer it when you scan."
   },
   "phq9": {
     "progress": "Questions {from}–{to} of 9",
