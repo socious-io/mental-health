@@ -7,8 +7,8 @@
     "typecheck": "node --check src/index.js && node --check src/escrow.js && node --check src/selftest.js"
   },
   "dependencies": {
-    "@meshsdk/core": "1.8.2",
-    "@meshsdk/core-csl": "1.8.2",
+    "@meshsdk/core": "latest",
+    "@meshsdk/core-csl": "latest",
     "hono": "^4.6.14",
     "@hono/node-server": "^1.13.7"
   }
