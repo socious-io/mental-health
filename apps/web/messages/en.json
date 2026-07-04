@@ -53,14 +53,22 @@
   },
   "verify": {
     "title": "Verify with Socious Wallet",
-    "body": "Scan with the Socious Wallet app. Your wallet proves you hold an over-18 credential — your identity stays on your device.",
+    "body": "Step 2 of 2 — present your credential. Your wallet proves you hold an over-18 credential; your identity stays on your device.",
     "openWallet": "Open Socious Wallet",
     "waiting": "Waiting for your wallet…",
     "noWallet": "Don't have the wallet yet?",
     "demoNote": "Demo mode: your account will verify on the next check.",
     "done": "You're verified",
     "error": "Something went wrong. Please try again.",
-    "close": "Close"
+    "close": "Close",
+    "attestBody": "First, claim your eligibility credential — a verifiable credential in your Socious Wallet proving you're over 18. You only do this once.",
+    "attestLabel": "I confirm that I am 18 years of age or older.",
+    "attestCta": "Issue my eligibility credential",
+    "attestNote": "MVP note: eligibility is self-attested; the credential mechanics are real and this slot is designed for a production ID-verification provider.",
+    "claimBody": "Step 1 of 2 — add the credential to your wallet:",
+    "cameraHint": "📷 Scan with your phone camera (not the wallet's scanner) — the page will hand off to Socious Wallet.",
+    "orOpenLink": "…or open this link on your phone (also sent by email)",
+    "claimDone": "I've added it to my wallet — continue"
   },
   "phq9": {
     "progress": "Questions {from}–{to} of 9",

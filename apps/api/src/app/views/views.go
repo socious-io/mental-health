@@ -13,6 +13,7 @@ func Init(r *gin.Engine) {
 	authGroup(r)
 	usersGroup(r)
 	verificationsGroup(r)
+	eligibilityGroup(r)
 	screeningsGroup(r)
 	providersGroup(r)
 	bookingsGroup(r)
