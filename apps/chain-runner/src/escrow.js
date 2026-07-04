@@ -12,11 +12,12 @@ const {
   MeshWallet,
   MeshTxBuilder,
   serializePlutusScript,
-  mConStr0,
-  mConStr1,
-  mConStr2,
+  conStr0,
+  conStr1,
+  conStr2,
   pubKeyAddress,
   value,
+  DEFAULT_REDEEMER_BUDGET,
 } = require('@meshsdk/core');
 const { deserializeAddress } = require('@meshsdk/core');
 
@@ -77,6 +78,7 @@ function mAddress(bech32) {
   const { pubKeyHash, stakeCredentialHash } = deserializeAddress(bech32);
   return pubKeyAddress(pubKeyHash, stakeCredentialHash || undefined);
 }
+const emptyAssets = [];
 
 const lovelaceValue = (n) => [{ unit: 'lovelace', quantity: String(n) }];
 
@@ -92,24 +94,22 @@ async function waitForUtxo(bf, txHash, outputIndex) {
   }
   throw new Error(`utxo ${txHash}#${outputIndex} not found after waiting`);
 }
-// MValue for datum: Pairs<PolicyId, Pairs<AssetName, Int>> — ADA = "" / ""
-const mValueLovelace = (n) => [[ '', [[ '', BigInt(n) ]] ]];
-
+// JSON-typed constructors exactly as the vendored offchain.ts builds them.
 function initiationDatum(orgAddr, lovelace, feeAddr, feeLovelace) {
-  return mConStr0([mAddress(orgAddr), mValueLovelace(lovelace), mAddress(feeAddr), mValueLovelace(feeLovelace)]);
+  return conStr0([mAddress(orgAddr), value(lovelaceValue(lovelace)), mAddress(feeAddr), value(lovelaceValue(feeLovelace))]);
 }
 
 function activeDatum(orgAddr, lovelace, recipientAddr, feeAddr, feeLovelace) {
-  return mConStr1([
-    mAddress(orgAddr), mValueLovelace(lovelace),
-    mAddress(recipientAddr), [],
-    mAddress(feeAddr), mValueLovelace(feeLovelace),
+  return conStr1([
+    mAddress(orgAddr), value(lovelaceValue(lovelace)),
+    mAddress(recipientAddr), value(emptyAssets),
+    mAddress(feeAddr), value(lovelaceValue(feeLovelace)),
   ]);
 }
 
-const recipientDepositRedeemer = (recipientAddr) => mConStr0([mAddress(recipientAddr), []]);
-const cancelRedeemer = () => mConStr1([]);
-const completeRedeemer = () => mConStr2([]);
+const recipientDepositRedeemer = (recipientAddr) => conStr0([mAddress(recipientAddr), value(emptyAssets)]);
+const cancelRedeemer = () => conStr1([]);
+const completeRedeemer = () => conStr2([]);
 
 const FEE_LOVELACE = 1_500_000; // platform fee kept minimal for milestone evidence
 
@@ -129,7 +129,7 @@ async function initiate({ lovelace }) {
   const txb = await newTxBuilder(bf);
   await txb
     .txOut(escrowAddress(), lovelaceValue(total))
-    .txOutInlineDatumValue(initiationDatum(orgAddr, lovelace, adminAddr, FEE_LOVELACE))
+    .txOutInlineDatumValue(initiationDatum(orgAddr, lovelace, adminAddr, FEE_LOVELACE), 'JSON')
     .changeAddress(orgAddr)
     .selectUtxosFrom(utxos)
     .complete();
@@ -164,10 +164,10 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     .spendingPlutusScriptV2()
     .txIn(txHash, Number(idxStr), sUtxo.output.amount, escrowAddress())
     .txInInlineDatumPresent()
-    .txInRedeemerValue(recipientDepositRedeemer(pAddr))
+    .txInRedeemerValue(recipientDepositRedeemer(pAddr), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
     .txOut(escrowAddress(), sUtxo.output.amount)
-    .txOutInlineDatumValue(activeDatum(org_addr, lovelace, pAddr, adminAddr, FEE_LOVELACE))
+    .txOutInlineDatumValue(activeDatum(org_addr, lovelace, pAddr, adminAddr, FEE_LOVELACE), 'JSON')
     .changeAddress(pAddr)
     .selectUtxosFrom(pUtxos)
     .requiredSignerHash(deserializeAddress(pAddr).pubKeyHash)
@@ -191,7 +191,7 @@ async function release({ escrow_utxo, reward_address, lovelace }) {
     .spendingPlutusScriptV2()
     .txIn(txHash, Number(idxStr), sUtxo.output.amount, escrowAddress())
     .txInInlineDatumPresent()
-    .txInRedeemerValue(completeRedeemer())
+    .txInRedeemerValue(completeRedeemer(), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
     .txOut(reward_address, lovelaceValue(lovelace))
     .txOut(adminAddr, lovelaceValue(FEE_LOVELACE))
