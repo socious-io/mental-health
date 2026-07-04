@@ -24,7 +24,7 @@ func verificationsGroup(r *gin.Engine) {
 			return
 		}
 		if config.C.Demo.Enabled {
-			v, err := models.UpsertVerification(user.ID, "demo", "demo://verified")
+			v, err := models.UpsertVerification(user.ID, "demo", "demo", "demo://verified")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "internal"})
 				return
@@ -37,13 +37,25 @@ func verificationsGroup(r *gin.Engine) {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "verification not configured"})
 			return
 		}
-		url := shin.VerificationRedirectURL(shinVID, user.ID.String())
-		v, err := models.UpsertVerification(user.ID, shinVID, url)
+		// Full server-side hand-off: create the per-user session on Shin and
+		// fetch its OOB short link — the QR is scanned directly by the
+		// Socious Wallet app (its scanner resolves short links via /fetch).
+		ind, err := shin.CreateIndividual(shinVID, user.ID.String())
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "shin: " + err.Error()})
+			return
+		}
+		connectURL, err := shin.IndividualConnect(ind.ID)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "shin connect: " + err.Error()})
+			return
+		}
+		v, err := models.UpsertVerification(user.ID, shinVID, ind.ID, connectURL)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal"})
 			return
 		}
-		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": url})
+		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": connectURL})
 	})
 
 	g.GET("", func(c *gin.Context) {
@@ -62,6 +74,9 @@ func verificationsGroup(r *gin.Engine) {
 			models.MarkUserVerified(user.ID)
 			c.JSON(http.StatusOK, gin.H{"verified": true, "demo": true})
 			return
+		}
+		if v.ShinIndividualID != nil && *v.ShinIndividualID != "" && *v.ShinIndividualID != "demo" {
+			shin.IndividualVerify(*v.ShinIndividualID)
 		}
 		res, err := shin.CheckIndividual(*v.ShinVerificationID, user.ID.String())
 		if err != nil {

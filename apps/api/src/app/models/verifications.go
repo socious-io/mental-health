@@ -10,18 +10,19 @@ type Verification struct {
 	ID                 uuid.UUID `db:"id" json:"id"`
 	UserID             uuid.UUID `db:"user_id" json:"-"`
 	ShinVerificationID *string   `db:"shin_verification_id" json:"-"`
+	ShinIndividualID   *string   `db:"shin_individual_id" json:"-"`
 	Status             string    `db:"status" json:"status"`
 	ConnectURL         *string   `db:"connect_url" json:"connect_url,omitempty"`
 	CreatedAt          time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt          time.Time `db:"updated_at" json:"updated_at"`
 }
 
-func UpsertVerification(userID uuid.UUID, shinID, connectURL string) (*Verification, error) {
+func UpsertVerification(userID uuid.UUID, shinID, individualID, connectURL string) (*Verification, error) {
 	v := new(Verification)
 	err := DB.Get(v, `
-		INSERT INTO verifications (user_id, shin_verification_id, connect_url, status)
-		VALUES ($1, $2, $3, 'REQUESTED')
-		RETURNING *`, userID, shinID, connectURL)
+		INSERT INTO verifications (user_id, shin_verification_id, shin_individual_id, connect_url, status)
+		VALUES ($1, $2, $3, $4, 'REQUESTED')
+		RETURNING *`, userID, shinID, individualID, connectURL)
 	return v, err
 }
 

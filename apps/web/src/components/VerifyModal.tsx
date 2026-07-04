@@ -61,7 +61,6 @@ export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onCl
               <>
                 <div className="mt-5 flex justify-center"><QRCodeSVG value={connectUrl} size={190} /></div>
                 <p className="mt-3 text-xs font-semibold text-primary-700">{t('cameraHint')}</p>
-                <a href={connectUrl} target="_blank" rel="noreferrer" className="mt-1 block text-xs text-gray-500 underline">{t('orOpenLink')}</a>
                 <p className="mt-4 text-xs text-gray-500">{t('waiting')}</p>
               </>
             ) : (

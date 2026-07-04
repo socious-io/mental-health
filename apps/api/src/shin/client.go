@@ -177,3 +177,40 @@ func CheckIndividual(verificationID, customerID string) (*IndividualStatus, erro
 	}
 	return &res, nil
 }
+
+type Individual struct {
+	ID            string  `json:"id"`
+	Status        string  `json:"status"`
+	ConnectionURL *string `json:"connection_url"`
+}
+
+// CreateIndividual registers a per-user verification session (public endpoint).
+func CreateIndividual(verificationID, customerID string) (*Individual, error) {
+	var res Individual
+	err := request("POST", "/verifications/individuals", "", map[string]any{
+		"verification_id": verificationID,
+		"customer_id":     customerID,
+	}, &res)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+// IndividualConnect returns the wallet-scannable OOB short link for the session.
+func IndividualConnect(individualID string) (string, error) {
+	var res Individual
+	if err := request("GET", "/verifications/"+individualID+"/connect", "", nil, &res); err != nil {
+		return "", err
+	}
+	if res.ConnectionURL == nil {
+		return "", fmt.Errorf("shin returned no connection_url")
+	}
+	return *res.ConnectionURL, nil
+}
+
+// IndividualVerify drives Shin's proof verification for the session (the
+// shin-webapp normally polls this; Moya's backend does it instead).
+func IndividualVerify(individualID string) {
+	_ = request("GET", "/verifications/"+individualID+"/verify", "", nil, nil)
+}

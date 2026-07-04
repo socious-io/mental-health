@@ -60,10 +60,9 @@
     "done": "You're verified",
     "error": "Something went wrong. Please try again.",
     "close": "Close",
-    "cameraHint": "📷 Scan with your phone camera (not the wallet's scanner) — the page will hand off to Socious Wallet.",
-    "orOpenLink": "…or open this link on your phone (also sent by email)",
-    "oneQrBody": "One scan proves two facts at once: you completed identity verification in Socious Wallet, and you are over 18. Nothing else is shared with Moya.",
-    "kycPrereq": "Prerequisite: complete identity verification inside the Socious Wallet app first (Wallet → Verify). If you haven't, the wallet will offer it when you scan."
+    "cameraHint": "Scan with the Socious Wallet app (Scan tab)",
+    "oneQrBody": "Please download Socious Wallet and go through the KYC process — or use an existing SSI wallet with a KYC credential in it. Once you are verified, come back and scan this QR code with your Socious Wallet.",
+    "kycPrereq": "One scan proves two facts at once: you completed KYC, and you are over 18. Your name, documents and details never reach Moya — only a yes/no proof."
   },
   "phq9": {
     "progress": "Questions {from}–{to} of 9",
