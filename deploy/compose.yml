@@ -42,7 +42,7 @@ services:
       BLOCKFROST_API_KEY: ${BLOCKFROST_API_KEY:-}
       CARDANO_NETWORK: ${CARDANO_NETWORK:-preprod}
     volumes:
-      - /etc/moya/wallets:/app/wallets:ro
+      - /etc/moya/wallets:/app/wallets
     expose:
       - "5071"
 
