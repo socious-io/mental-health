@@ -193,7 +193,12 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     .txInRedeemerValue(recipientDepositRedeemer(pAddr), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
     .txInCollateral(col.input.txHash, col.input.outputIndex, col.output.amount, col.output.address)
-    .txOut(escrowAddress(), sUtxo.output.amount)
+    // Deployed-bytecode quirk (plutus.json predates source fix 37db470): the
+    // shipped validator's RecipientDeposit requires output >= input +
+    // recipient_assets + FEE_ASSETS — the fee must be deposited again here.
+    .txOut(escrowAddress(), sUtxo.output.amount.map((a) =>
+      a.unit === 'lovelace' ? { ...a, quantity: String(Number(a.quantity) + FEE_LOVELACE) } : a,
+    ))
     .txOutInlineDatumValue(activeDatum(org_addr, lovelace, pAddr, adminAddr, FEE_LOVELACE), 'JSON')
     .changeAddress(pAddr)
     .selectUtxosFrom(spendable)
