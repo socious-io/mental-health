@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -51,6 +52,11 @@ func Init(path string) error {
 	}
 	if C.Port == 0 {
 		C.Port = 5070
+	}
+	// Demo mode auto-verifies accounts — never allowed in production unless
+	// explicitly forced (reviewer sessions) via ALLOW_DEMO=true.
+	if C.Env == "production" && C.Demo.Enabled && os.Getenv("ALLOW_DEMO") != "true" {
+		return fmt.Errorf("refusing to start: demo.enabled=true in production (set ALLOW_DEMO=true to override)")
 	}
 	return nil
 }
