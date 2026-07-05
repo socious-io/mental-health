@@ -82,11 +82,17 @@ func studiesGroup(r *gin.Engine) {
 		}
 		rewardAddr := ""
 		if config.C.Payment.Enabled {
-			var w struct {
-				Address string `json:"address"`
-			}
-			if err := app.ChainRunner("/wallets/new", gin.H{"user_id": user.ID.String()}, &w); err == nil {
-				rewardAddr = w.Address
+			if user.CardanoAddress != nil && *user.CardanoAddress != "" {
+				// Self-custody payout: the escrow datum names the user's own
+				// address as recipient; release pays it directly.
+				rewardAddr = *user.CardanoAddress
+			} else {
+				var w struct {
+					Address string `json:"address"`
+				}
+				if err := app.ChainRunner("/wallets/new", gin.H{"user_id": user.ID.String()}, &w); err == nil {
+					rewardAddr = w.Address
+				}
 			}
 		}
 		p, err := models.CreateParticipation(id, user.ID, rewardAddr)
@@ -116,6 +122,7 @@ func studiesGroup(r *gin.Engine) {
 				"participant_wallet": "users/" + user.ID.String(),
 				"org_addr":           init.OrgAddr,
 				"lovelace":           s.RewardLovelace,
+				"recipient_addr":     rewardAddr,
 			}, &bound); err != nil {
 				models.DeleteParticipation(p.ID)
 				c.JSON(http.StatusBadGateway, gin.H{"error": "escrow bind: " + err.Error()})

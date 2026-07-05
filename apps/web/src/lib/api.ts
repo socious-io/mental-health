@@ -32,6 +32,7 @@ export interface User {
   id: string;
   handle: string;
   identity_verified: boolean;
+  cardano_address?: string;
   locale: string;
   role: string;
   created_at: string;

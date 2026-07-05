@@ -15,6 +15,7 @@ type User struct {
 	VerifiedAt       *time.Time `db:"verified_at" json:"verified_at,omitempty"`
 	Locale           string     `db:"locale" json:"locale"`
 	Role             string     `db:"role" json:"role"`
+	CardanoAddress   *string    `db:"cardano_address" json:"cardano_address,omitempty"`
 	Over18CredentialID *string  `db:"over18_credential_id" json:"-"`
 	CreatedAt        time.Time  `db:"created_at" json:"created_at"`
 }
@@ -42,5 +43,10 @@ func GetUserByLogin(login string) (*User, error) {
 
 func SetOver18Credential(id uuid.UUID, credID string) error {
 	_, err := DB.Exec(`UPDATE users SET over18_credential_id=$2 WHERE id=$1`, id, credID)
+	return err
+}
+
+func SetUserCardanoAddress(id uuid.UUID, address *string) error {
+	_, err := DB.Exec(`UPDATE users SET cardano_address=$2 WHERE id=$1`, id, address)
 	return err
 }

@@ -13,6 +13,28 @@ export default function Dashboard() {
   const { user, refresh } = useUser();
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [screening, setScreening] = useState<Screening | null>(null);
+  const [addr, setAddr] = useState('');
+  const [addrSaved, setAddrSaved] = useState<string | null>(null);
+  const [addrBusy, setAddrBusy] = useState(false);
+  const [addrErr, setAddrErr] = useState('');
+
+  useEffect(() => {
+    if (user?.cardano_address) { setAddr(user.cardano_address); setAddrSaved(user.cardano_address); }
+  }, [user?.cardano_address]);
+
+  const saveAddr = async () => {
+    setAddrBusy(true);
+    setAddrErr('');
+    try {
+      await api('/users/me/wallet', { method: 'PATCH', body: JSON.stringify({ address: addr.trim() }) });
+      setAddrSaved(addr.trim() || null);
+      refresh();
+    } catch (e) {
+      setAddrErr((e as Error).message);
+    } finally {
+      setAddrBusy(false);
+    }
+  };
 
   useEffect(() => {
     api<Screening>('/screenings/latest').then(setScreening).catch(() => setScreening(null));
@@ -78,6 +100,25 @@ export default function Dashboard() {
             {t('seeMatches')}
           </Link>
         </div>
+      </div>
+      <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="font-bold text-gray-900">{t('walletCard')}</h2>
+        <p className="mt-1.5 text-sm text-gray-600">{t('walletBody')}</p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            value={addr}
+            onChange={(e) => setAddr(e.target.value)}
+            placeholder="addr_test1…"
+            className="flex-1 rounded-lg border border-gray-300 px-3.5 py-2.5 font-mono text-xs text-gray-900 placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100"
+          />
+          <button onClick={saveAddr} disabled={addrBusy} className="rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
+            {addrBusy ? '…' : t('walletSave')}
+          </button>
+        </div>
+        {addrErr && <p className="mt-2 text-xs text-red-600">{addrErr}</p>}
+        {addrSaved && !addrErr && (
+          <p className="mt-2 text-xs font-semibold text-mint-700">✓ {t('walletSaved')}</p>
+        )}
       </div>
       <VerifyModal open={verifyOpen} onClose={() => setVerifyOpen(false)} onVerified={onVerified} />
     </Shell>

@@ -163,7 +163,7 @@ async function initiate({ lovelace }) {
 }
 
 // Step 2 — bind participant (RecipientDeposit, recipient deposits nothing).
-async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
+async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace, recipient_addr }) {
   const bf = provider();
   const participant = await loadOrCreateWallet(participant_wallet);
   // Ensure the participant custodial wallet can pay fees + provide collateral.
@@ -190,7 +190,7 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     .spendingPlutusScriptV2()
     .txIn(txHash, Number(idxStr), sUtxo.output.amount, escrowAddress())
     .txInInlineDatumPresent()
-    .txInRedeemerValue(recipientDepositRedeemer(pAddr), 'JSON', DEFAULT_REDEEMER_BUDGET)
+    .txInRedeemerValue(recipientDepositRedeemer(recipient_addr || pAddr), 'JSON', DEFAULT_REDEEMER_BUDGET)
     .txInScript(code)
     .txInCollateral(col.input.txHash, col.input.outputIndex, col.output.amount, col.output.address)
     // Deployed-bytecode quirk (plutus.json predates source fix 37db470): the
@@ -199,7 +199,7 @@ async function bind({ escrow_utxo, participant_wallet, org_addr, lovelace }) {
     .txOut(escrowAddress(), sUtxo.output.amount.map((a) =>
       a.unit === 'lovelace' ? { ...a, quantity: String(Number(a.quantity) + FEE_LOVELACE) } : a,
     ))
-    .txOutInlineDatumValue(activeDatum(org_addr, lovelace, pAddr, adminAddr, FEE_LOVELACE), 'JSON')
+    .txOutInlineDatumValue(activeDatum(org_addr, lovelace, recipient_addr || pAddr, adminAddr, FEE_LOVELACE), 'JSON')
     .changeAddress(pAddr)
     .selectUtxosFrom(spendable)
     .requiredSignerHash(deserializeAddress(pAddr).pubKeyHash)

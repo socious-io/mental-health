@@ -57,7 +57,11 @@
     "band_moderate": "Moderate",
     "band_moderately_severe": "Moderately severe",
     "band_severe": "Severe",
-    "supportAttested": "Support need attested — credential in your wallet"
+    "supportAttested": "Support need attested — credential in your wallet",
+    "walletCard": "Reward payout address (optional)",
+    "walletBody": "Research rewards release to a wallet we hold for you by default. Add your own Cardano address (preprod: addr_test1…) and escrowed rewards pay out directly to it.",
+    "walletSave": "Save",
+    "walletSaved": "Rewards will pay out to your address"
   },
   "verify": {
     "title": "Verify with Socious Wallet",

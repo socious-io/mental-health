@@ -57,7 +57,11 @@
     "band_moderate": "中等度",
     "band_moderately_severe": "中等度〜重度",
     "band_severe": "重度",
-    "supportAttested": "支援ニーズ証明済み — 資格情報はウォレットに保存されています"
+    "supportAttested": "支援ニーズ証明済み — 資格情報はウォレットに保存されています",
+    "walletCard": "報酬受け取りアドレス（任意）",
+    "walletBody": "研究報酬は通常、Moyaが管理するウォレットに支払われます。ご自身のCardanoアドレス（preprod: addr_test1…）を登録すると、エスクロー報酬が直接そのアドレスに支払われます。",
+    "walletSave": "保存",
+    "walletSaved": "報酬はご登録のアドレスに支払われます"
   },
   "verify": {
     "title": "Socious Walletで認証",
