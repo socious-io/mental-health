@@ -52,6 +52,11 @@ export default function Dashboard() {
               {' '}({screening.score}/27)
             </p>
           )}
+          {screening && (screening.credential_status === 'ISSUED' || screening.credential_status === 'CLAIMED') && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-mint-700">
+              ✓ {t('supportAttested')}
+            </p>
+          )}
           <Link
             href="/screening"
             className="mt-4 inline-block rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"

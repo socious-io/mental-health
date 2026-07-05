@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Shell } from '@/components/Shell';
 import { PHQ9 } from '@/components/PHQ9';
 import { CrisisCard } from '@/components/CrisisCard';
-import { Screening } from '@/lib/api';
+import { api, Screening } from '@/lib/api';
 
 type Stage = 'intro' | 'questions' | 'crisis' | 'result';
 
@@ -18,6 +18,22 @@ export default function ScreeningPage() {
   const [claimUrl, setClaimUrl] = useState('');
   const [walletUrl, setWalletUrl] = useState('');
   const [showQr, setShowQr] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+
+  useEffect(() => {
+    if (stage !== 'result' || !claimUrl || claimed) return;
+    const timer = setInterval(async () => {
+      try {
+        const latest = await api<Screening>('/screenings/latest');
+        if (latest.credential_status === 'ISSUED' || latest.credential_status === 'CLAIMED') {
+          setClaimed(true);
+          clearInterval(timer);
+        }
+      } catch { /* keep polling */ }
+    }, 5000);
+    const cap = setTimeout(() => clearInterval(timer), 600000);
+    return () => { clearInterval(timer); clearTimeout(cap); };
+  }, [stage, claimUrl, claimed]);
 
   return (
     <Shell>
@@ -56,7 +72,14 @@ export default function ScreeningPage() {
           <h1 className="mt-4 text-2xl font-bold text-gray-900">{t('resultTitle')}</h1>
           <p className="mt-3 text-gray-600">{t(`explain_${result.band}`)}</p>
           <p className="mt-3 text-sm text-gray-500">{t('bandOnly')}</p>
-          {claimUrl && (
+          {claimUrl && claimed && (
+            <div className="mt-8 rounded-xl border border-mint-200 bg-mint-50 p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint-100 text-xl text-mint-700">✓</div>
+              <h2 className="mt-3 font-bold text-mint-800">{t('attestedTitle')}</h2>
+              <p className="mt-1.5 text-sm text-mint-700">{t('attestedBody', { band: t(`band_${result.band}`) })}</p>
+            </div>
+          )}
+          {claimUrl && !claimed && (
             <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
               <h2 className="font-bold text-gray-900">{t('claimTitle')}</h2>
               <p className="mt-1.5 text-sm text-gray-600">{t('claimBody')}</p>

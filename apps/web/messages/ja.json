@@ -56,7 +56,8 @@
     "band_mild": "軽度",
     "band_moderate": "中等度",
     "band_moderately_severe": "中等度〜重度",
-    "band_severe": "重度"
+    "band_severe": "重度",
+    "supportAttested": "支援ニーズ証明済み — 資格情報はウォレットに保存されています"
   },
   "verify": {
     "title": "Socious Walletで認証",
@@ -130,7 +131,9 @@
     "claimOpenBrowser": "Socious Wallet（ブラウザ版）を開く",
     "claimPreferApp": "モバイルアプリをご希望の場合はQRコードをスキャン",
     "claimPreferBrowser": "ブラウザ版に戻る",
-    "claimQrHint": "Socious Walletアプリのスキャン画面で読み取り、資格情報を受け取ってください。"
+    "claimQrHint": "Socious Walletアプリのスキャン画面で読み取り、資格情報を受け取ってください。",
+    "attestedTitle": "支援ニーズが証明されました",
+    "attestedBody": "スクリーニング結果（{band}）が検証可能な資格情報としてSocious Walletに保存されました。回答内容を明かすことなく、あなたに合った支援や研究参加に利用できます。"
   },
   "matches": {
     "title": "あなたに合った支援",

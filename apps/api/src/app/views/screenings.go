@@ -77,6 +77,17 @@ func screeningsGroup(r *gin.Engine) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "no screening yet"})
 			return
 		}
+		// Live-sync the claim state: Shin flips the credential to ISSUED when
+		// the wallet takes delivery — that is the "attested in your wallet"
+		// check mark, mirroring the identity-verification poll pattern.
+		if s.CredentialID != nil && s.CredentialStatus != nil &&
+			*s.CredentialStatus == "CREATED" && *s.CredentialID != "" && *s.CredentialID != "demo" {
+			if cred, cerr := shin.GetCredential(*s.CredentialID); cerr == nil && cred.Status != *s.CredentialStatus {
+				if uerr := models.SetScreeningCredential(s.ID, *s.CredentialID, cred.Status); uerr == nil {
+					s.CredentialStatus = &cred.Status
+				}
+			}
+		}
 		c.JSON(http.StatusOK, s)
 	})
 }

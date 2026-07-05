@@ -56,7 +56,8 @@
     "band_mild": "Mild",
     "band_moderate": "Moderate",
     "band_moderately_severe": "Moderately severe",
-    "band_severe": "Severe"
+    "band_severe": "Severe",
+    "supportAttested": "Support need attested — credential in your wallet"
   },
   "verify": {
     "title": "Verify with Socious Wallet",
@@ -130,7 +131,9 @@
     "claimOpenBrowser": "Open Socious Wallet (browser)",
     "claimPreferApp": "Prefer the mobile app? Scan a QR code instead",
     "claimPreferBrowser": "Back to browser wallet",
-    "claimQrHint": "Scan with the Socious Wallet app (Scan tab), then accept the credential."
+    "claimQrHint": "Scan with the Socious Wallet app (Scan tab), then accept the credential.",
+    "attestedTitle": "Support need attested",
+    "attestedBody": "Your {band} screening result is now a verifiable credential in your Socious Wallet. It unlocks matched support and research participation — without revealing your answers."
   },
   "matches": {
     "title": "Support matched to you",
