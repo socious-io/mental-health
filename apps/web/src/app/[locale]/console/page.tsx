@@ -9,7 +9,7 @@ interface Study {
   id: string; title_en: string; title_ja: string; reward_lovelace: number;
   target_participants: number; requires_treatment_need: boolean; status: string; escrow_tx?: string;
 }
-interface Row { id: string; handle?: string; status: string; progress: number; release_tx?: string }
+interface Row { id: string; handle?: string; status: string; progress: number; escrow_tx?: string; bind_tx?: string; release_tx?: string }
 
 export default function OrgConsole() {
   const t = useTranslations('console');
@@ -103,6 +103,9 @@ export default function OrgConsole() {
                 {busy === s.id ? '…' : t('fund')}
               </button>
             )}
+            {s.status === 'DRAFT' && (
+              <p className="mt-2 text-xs text-gray-500">{t('fundHint')}</p>
+            )}
             {s.escrow_tx && (
               <a className="mt-2 inline-block text-xs font-medium text-mint-700 underline" target="_blank" rel="noreferrer"
                  href={`https://${process.env.NEXT_PUBLIC_CARDANO_NETWORK === 'mainnet' ? '' : 'preprod.'}cardanoscan.io/transaction/${s.escrow_tx}`}>
@@ -116,6 +119,12 @@ export default function OrgConsole() {
                   <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-gray-50 px-4 py-2.5 text-sm">
                     <span className="font-semibold text-gray-900">{p.handle}</span>
                     <span className="text-gray-600">{p.status} · {p.progress}%</span>
+                    {p.escrow_tx && (
+                      <a className="text-xs font-medium text-mint-700 underline" target="_blank" rel="noreferrer"
+                         href={`https://${process.env.NEXT_PUBLIC_CARDANO_NETWORK === 'mainnet' ? '' : 'preprod.'}cardanoscan.io/transaction/${p.escrow_tx}`}>
+                        {t('lockTx')}
+                      </a>
+                    )}
                     {p.status === 'COMPLETED' && (
                       <button onClick={() => complete(p.id)} disabled={busy === p.id} className="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
                         {busy === p.id ? '…' : t('release')}

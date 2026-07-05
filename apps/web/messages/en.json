@@ -217,12 +217,14 @@
     "requiresTN": "Require Treatment Need Certificate (clinical studies)",
     "create": "Create draft",
     "perParticipant": "participant",
-    "fund": "Fund escrow & publish",
+    "fund": "Publish study",
     "escrowTx": "Escrow transaction ↗",
     "participants": "Participants",
     "noParticipants": "No participants yet.",
     "release": "Release reward",
     "released": "Reward released",
-    "note": "Funding locks the reward at the escrow validator; release pays the participant from escrow. Both are public Cardano transactions."
+    "note": "Funding locks the reward at the escrow validator; release pays the participant from escrow. Both are public Cardano transactions.",
+    "fundHint": "Publishing opens recruitment. Rewards are locked in the on-chain escrow per participant at the moment they join (one escrow box per participant) — no payment happens at publish time.",
+    "lockTx": "escrow lock ↗"
   }
 }
