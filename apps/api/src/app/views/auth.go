@@ -14,10 +14,11 @@ import (
 var handleRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{2,29}$`)
 
 type registerForm struct {
-	Handle   string `json:"handle" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-	Locale   string `json:"locale"`
+	Handle      string `json:"handle" binding:"required"`
+	Email       string `json:"email" binding:"required,email"`
+	Password    string `json:"password" binding:"required,min=8"`
+	Locale      string `json:"locale"`
+	AccountType string `json:"account_type"`
 }
 
 type loginForm struct {
@@ -42,12 +43,18 @@ func authGroup(r *gin.Engine) {
 		if form.Locale != "ja" {
 			form.Locale = "en"
 		}
+		role := "user"
+		switch form.AccountType {
+		case "provider", "org":
+			// Self-serve for the MVP: production would add an onboarding review.
+			role = form.AccountType
+		}
 		hash, err := app.HashPassword(form.Password)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 			return
 		}
-		user, err := models.CreateUser(form.Handle, strings.ToLower(form.Email), hash, form.Locale)
+		user, err := models.CreateUser(form.Handle, strings.ToLower(form.Email), hash, form.Locale, role)
 		if err != nil {
 			c.JSON(http.StatusConflict, gin.H{"error": "handle or email already taken"})
 			return

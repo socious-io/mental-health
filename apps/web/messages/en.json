@@ -22,7 +22,14 @@
     "logIn": "Log in",
     "noPhone": "No phone. No real name — ever.",
     "haveAccount": "Already have an account?",
-    "needAccount": "New here?"
+    "needAccount": "New here?",
+    "accountType": "Account type",
+    "type_user": "Individual",
+    "type_userHint": "Take screenings, find support, join research anonymously.",
+    "type_provider": "Mental-health provider",
+    "type_providerHint": "Issue treatment-need credentials to the people you support.",
+    "type_org": "Research organization",
+    "type_orgHint": "Post research opportunities with on-chain escrowed rewards."
   },
   "shell": {
     "privacy": "Privacy Ledger",

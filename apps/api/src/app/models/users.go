@@ -19,12 +19,12 @@ type User struct {
 	CreatedAt        time.Time  `db:"created_at" json:"created_at"`
 }
 
-func CreateUser(handle, email, passwordHash, locale string) (*User, error) {
+func CreateUser(handle, email, passwordHash, locale, role string) (*User, error) {
 	u := new(User)
 	err := DB.Get(u, `
-		INSERT INTO users (handle, email, password_hash, locale)
-		VALUES ($1, $2, $3, $4)
-		RETURNING *`, handle, email, passwordHash, locale)
+		INSERT INTO users (handle, email, password_hash, locale, role)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING *`, handle, email, passwordHash, locale, role)
 	return u, err
 }
 

@@ -22,7 +22,14 @@
     "logIn": "ログイン",
     "noPhone": "電話番号も実名も、一切不要です。",
     "haveAccount": "すでにアカウントをお持ちですか？",
-    "needAccount": "はじめての方は"
+    "needAccount": "はじめての方は",
+    "accountType": "アカウントの種類",
+    "type_user": "個人",
+    "type_userHint": "匿名でスクリーニング・支援探し・研究参加ができます。",
+    "type_provider": "メンタルヘルス支援者（プロバイダー）",
+    "type_providerHint": "支援中の方に治療ニーズ資格情報を発行できます。",
+    "type_org": "研究機関",
+    "type_orgHint": "オンチェーンのエスクロー報酬つき研究機会を掲載できます。"
   },
   "shell": {
     "privacy": "プライバシー台帳",
