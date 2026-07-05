@@ -26,6 +26,15 @@ func UpsertVerification(userID uuid.UUID, shinID, individualID, connectURL strin
 	return v, err
 }
 
+func UpsertVerificationWithID(id, userID uuid.UUID, shinID, individualID, connectURL string) (*Verification, error) {
+	v := new(Verification)
+	err := DB.Get(v, `
+		INSERT INTO verifications (id, user_id, shin_verification_id, shin_individual_id, connect_url, status)
+		VALUES ($1, $2, $3, $4, $5, 'REQUESTED')
+		RETURNING *`, id, userID, shinID, individualID, connectURL)
+	return v, err
+}
+
 func GetVerificationByID(id uuid.UUID) (*Verification, error) {
 	v := new(Verification)
 	err := DB.Get(v, `SELECT * FROM verifications WHERE id=$1`, id)

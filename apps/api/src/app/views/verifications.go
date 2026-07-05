@@ -1,6 +1,7 @@
 package views
 
 import (
+	"github.com/google/uuid"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,13 @@ func verificationsGroup(r *gin.Engine) {
 		// Full server-side hand-off: create the per-user session on Shin and
 		// fetch its OOB short link — the QR is scanned directly by the
 		// Socious Wallet app (its scanner resolves short links via /fetch).
-		ind, err := shin.CreateIndividual(shinVID, user.ID.String())
+		// The customer id is unique PER ATTEMPT (row id suffix): Shin caches
+		// the DIDComm connection per individual, and a reused connection is
+		// bound to whichever wallet accepted it first — a retry from another
+		// device could otherwise never complete.
+		rowID := uuid.New()
+		customerID := user.ID.String() + "-" + rowID.String()[:8]
+		ind, err := shin.CreateIndividual(shinVID, customerID)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "shin: " + err.Error()})
 			return
@@ -60,7 +67,7 @@ func verificationsGroup(r *gin.Engine) {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "connect rewrite: " + err.Error()})
 			return
 		}
-		v, err := models.UpsertVerification(user.ID, shinVID, ind.ID, walletURL)
+		v, err := models.UpsertVerificationWithID(rowID, user.ID, shinVID, ind.ID, walletURL)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal"})
 			return
@@ -89,7 +96,8 @@ func verificationsGroup(r *gin.Engine) {
 		if v.ShinIndividualID != nil && *v.ShinIndividualID != "" && *v.ShinIndividualID != "demo" {
 			shin.IndividualVerify(*v.ShinIndividualID)
 		}
-		res, err := shin.CheckIndividual(*v.ShinVerificationID, user.ID.String())
+		customerID := user.ID.String() + "-" + v.ID.String()[:8]
+		res, err := shin.CheckIndividual(*v.ShinVerificationID, customerID)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"verified": false, "status": v.Status})
 			return
