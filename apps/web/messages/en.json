@@ -117,9 +117,13 @@
     "explain_severe": "Your answers suggest severe symptoms. Please consider reaching out to a professional as soon as you can — you deserve support, and it helps.",
     "bandOnly": "Only this band — never your answers — is used for matching.",
     "claimTitle": "Your screening credential",
-    "claimBody": "Scan with Socious Wallet to store this result as a verifiable credential — it unlocks matched support and research participation without revealing your answers.",
+    "claimBody": "Store this result as a verifiable credential in your Socious Wallet — it unlocks matched support and research participation without revealing your answers.",
     "openWallet": "Open Socious Wallet",
-    "seeSupport": "See support matched to me"
+    "seeSupport": "See support matched to me",
+    "claimOpenBrowser": "Open Socious Wallet (browser)",
+    "claimPreferApp": "Prefer the mobile app? Scan a QR code instead",
+    "claimPreferBrowser": "Back to browser wallet",
+    "claimQrHint": "Scan with the Socious Wallet app (Scan tab), then accept the credential."
   },
   "matches": {
     "title": "Support matched to you",

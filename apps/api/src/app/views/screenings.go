@@ -34,7 +34,7 @@ func screeningsGroup(r *gin.Engine) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal"})
 			return
 		}
-		var claimURL string
+		var claimURL, claimWalletURL string
 		if config.C.Demo.Enabled || config.C.Schemas.ScreeningResult == "" {
 			models.SetScreeningCredential(s.ID, "demo", "DEMO")
 		} else {
@@ -52,6 +52,12 @@ func screeningsGroup(r *gin.Engine) {
 			if err == nil {
 				models.SetScreeningCredential(s.ID, cred.ID, cred.Status)
 				claimURL = shin.CredentialConnectURL(cred.ID)
+				if short, cerr := shin.CredentialConnect(cred.ID); cerr == nil {
+					claimURL = short
+					if long, lerr := shin.ResolveShort(short); lerr == nil {
+						claimWalletURL = long
+					}
+				}
 			} else {
 				models.SetScreeningCredential(s.ID, "", fmt.Sprintf("ERROR: %v", err))
 			}
@@ -60,6 +66,7 @@ func screeningsGroup(r *gin.Engine) {
 			"screening":  s,
 			"crisis":     item9,
 			"claim_url":  claimURL,
+			"wallet_url": claimWalletURL,
 		})
 	})
 

@@ -117,9 +117,13 @@
     "explain_severe": "重度の症状が示唆されます。できるだけ早く専門家につながることをご検討ください。あなたは支えを受けるに値し、支援は力になります。",
     "bandOnly": "マッチングに使われるのはこの区分だけで、回答内容は決して使われません。",
     "claimTitle": "スクリーニング資格証明",
-    "claimBody": "Socious Walletでスキャンすると、この結果が検証可能な資格証明として保存されます。回答を明かすことなく、支援マッチングや研究参加に使えます。",
+    "claimBody": "この結果を検証可能な資格情報としてSocious Walletに保存できます。回答内容を明かすことなく、あなたに合った支援や研究参加への道が開きます。",
     "openWallet": "Socious Walletを開く",
-    "seeSupport": "自分に合った支援を見る"
+    "seeSupport": "自分に合った支援を見る",
+    "claimOpenBrowser": "Socious Wallet（ブラウザ版）を開く",
+    "claimPreferApp": "モバイルアプリをご希望の場合はQRコードをスキャン",
+    "claimPreferBrowser": "ブラウザ版に戻る",
+    "claimQrHint": "Socious Walletアプリのスキャン画面で読み取り、資格情報を受け取ってください。"
   },
   "matches": {
     "title": "あなたに合った支援",

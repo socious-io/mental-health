@@ -16,6 +16,8 @@ export default function ScreeningPage() {
   const [stage, setStage] = useState<Stage>('intro');
   const [result, setResult] = useState<Screening | null>(null);
   const [claimUrl, setClaimUrl] = useState('');
+  const [walletUrl, setWalletUrl] = useState('');
+  const [showQr, setShowQr] = useState(false);
 
   return (
     <Shell>
@@ -34,9 +36,10 @@ export default function ScreeningPage() {
       )}
       {stage === 'questions' && (
         <PHQ9
-          onDone={(s, crisis, claim) => {
+          onDone={(s, crisis, claim, wallet) => {
             setResult(s);
             setClaimUrl(claim);
+            setWalletUrl(wallet);
             setStage(crisis ? 'crisis' : 'result');
           }}
         />
@@ -57,12 +60,30 @@ export default function ScreeningPage() {
             <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
               <h2 className="font-bold text-gray-900">{t('claimTitle')}</h2>
               <p className="mt-1.5 text-sm text-gray-600">{t('claimBody')}</p>
-              <div className="mt-4 flex justify-center">
-                <QRCodeSVG value={claimUrl} size={150} />
-              </div>
-              <a href={claimUrl} target="_blank" rel="noreferrer" className="mt-3 block text-sm font-semibold text-primary-600 sm:hidden">
-                {t('openWallet')}
-              </a>
+              {!showQr ? (
+                <>
+                  <a
+                    href={walletUrl || claimUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-block w-full rounded-xl bg-primary-600 px-6 py-3.5 font-semibold text-white hover:bg-primary-700"
+                  >
+                    {t('claimOpenBrowser')}
+                  </a>
+                  <button onClick={() => setShowQr(true)} className="mt-3 block w-full text-xs font-semibold text-primary-700 underline">
+                    {t('claimPreferApp')}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="mt-4 flex justify-center">
+                    <QRCodeSVG value={claimUrl} size={150} />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">{t('claimQrHint')}</p>
+                  <button onClick={() => setShowQr(false)} className="mt-3 block w-full text-xs font-semibold text-primary-700 underline">
+                    {t('claimPreferBrowser')}</button>
+                </>
+              )}
             </div>
           )}
           <Link

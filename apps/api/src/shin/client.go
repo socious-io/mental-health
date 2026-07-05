@@ -241,3 +241,22 @@ func ResolveShort(shortURL string) (string, error) {
 func IndividualCallback(individualID string) error {
 	return request("GET", "/verifications/"+individualID+"/callback", "", nil, nil)
 }
+
+// CredentialConnect returns the wallet-scannable OOB short link for claiming
+// a credential (Shin rotates the underlying connection when stale).
+func CredentialConnect(id string) (string, error) {
+	tok, err := Token()
+	if err != nil {
+		return "", err
+	}
+	var res struct {
+		ConnectionURL *string `json:"connection_url"`
+	}
+	if err := request("GET", "/credentials/"+id+"/connect", tok, nil, &res); err != nil {
+		return "", err
+	}
+	if res.ConnectionURL == nil {
+		return "", fmt.Errorf("shin returned no connection_url for credential")
+	}
+	return *res.ConnectionURL, nil
+}

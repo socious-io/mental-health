@@ -6,7 +6,7 @@ import { api, Screening } from '@/lib/api';
 
 const N = 9;
 
-export function PHQ9({ onDone }: { onDone: (s: Screening, crisis: boolean, claimUrl: string) => void }) {
+export function PHQ9({ onDone }: { onDone: (s: Screening, crisis: boolean, claimUrl: string, walletUrl: string) => void }) {
   const t = useTranslations('phq9');
   const locale = useLocale();
   const [step, setStep] = useState(0); // 0..2 (3 questions each)
@@ -27,11 +27,11 @@ export function PHQ9({ onDone }: { onDone: (s: Screening, crisis: boolean, claim
     setBusy(true);
     setError('');
     try {
-      const res = await api<{ screening: Screening; crisis: boolean; claim_url: string }>('/screenings', {
+      const res = await api<{ screening: Screening; crisis: boolean; claim_url: string; wallet_url?: string }>('/screenings', {
         method: 'POST',
         body: JSON.stringify({ answers: answers.map((a) => a ?? 0) }),
       });
-      onDone(res.screening, res.crisis, res.claim_url);
+      onDone(res.screening, res.crisis, res.claim_url, res.wallet_url || '');
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
