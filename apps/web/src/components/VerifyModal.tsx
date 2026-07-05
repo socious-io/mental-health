@@ -5,16 +5,18 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 
-// ONE QR: the verification proves two facts in a single wallet presentation —
-// the user completed KYC in Socious Wallet, and their date of birth is 18+
-// years ago (predicate on the KYC credential). web-app-v2 pattern:
-// request → QR (phone camera) → poll every 5s.
+// One verification, two facts (KYC done + over 18), two ways to present it:
+// default = the browser wallet at wallet.socious.io (opens in a new tab,
+// walks new users through KYC, resumes the connection automatically);
+// optional = QR code scanned with the Socious Wallet mobile app.
 type Stage = 'verify' | 'verified' | 'error';
 
 export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onClose: () => void; onVerified: () => void }) {
   const t = useTranslations('verify');
   const [stage, setStage] = useState<Stage>('verify');
   const [connectUrl, setConnectUrl] = useState('');
+  const [walletUrl, setWalletUrl] = useState('');
+  const [showQr, setShowQr] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -22,10 +24,11 @@ export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onCl
     let cancelled = false;
     (async () => {
       try {
-        const res = await api<{ connect_url?: string; verified?: boolean }>('/credentials/verifications', { method: 'POST' });
+        const res = await api<{ connect_url?: string; wallet_url?: string; verified?: boolean }>('/credentials/verifications', { method: 'POST' });
         if (cancelled) return;
         if (res.verified) { setStage('verified'); onVerified(); return; }
         setConnectUrl(res.connect_url || '');
+        setWalletUrl(res.wallet_url || '');
         timer.current = setInterval(async () => {
           try {
             const check = await api<{ verified: boolean }>('/credentials/verifications');
@@ -36,7 +39,7 @@ export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onCl
             }
           } catch { /* keep polling */ }
         }, 5000);
-        setTimeout(() => timer.current && clearInterval(timer.current), 300000);
+        setTimeout(() => timer.current && clearInterval(timer.current), 600000);
       } catch {
         setStage('error');
       }
@@ -48,6 +51,7 @@ export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onCl
   }, [open, onVerified]);
 
   if (!open) return null;
+  const demo = connectUrl.startsWith('demo');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4" onClick={onClose}>
@@ -56,25 +60,53 @@ export function VerifyModal({ open, onClose, onVerified }: { open: boolean; onCl
 
         {stage === 'verify' && (
           <>
-            <p className="mt-2 text-sm text-gray-600">{t('oneQrBody')}</p>
-            {connectUrl && !connectUrl.startsWith('demo') ? (
+            {demo ? (
+              <p className="mt-6 text-sm text-mint-700">{t('demoNote')}</p>
+            ) : !showQr ? (
               <>
-                <div className="mt-5 flex justify-center"><QRCodeSVG value={connectUrl} size={190} /></div>
-                <p className="mt-3 text-xs font-semibold text-primary-700">{t('cameraHint')}</p>
+                <p className="mt-2 text-sm text-gray-600">{t('browserBody')}</p>
+                {walletUrl ? (
+                  <a
+                    href={walletUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-block w-full rounded-xl bg-primary-600 px-6 py-3.5 font-semibold text-white hover:bg-primary-700"
+                  >
+                    {t('openWallet')}
+                  </a>
+                ) : (
+                  <p className="mt-5 text-sm text-gray-400">…</p>
+                )}
+                <p className="mt-3 text-xs text-gray-500">{t('browserSteps')}</p>
                 <p className="mt-4 text-xs text-gray-500">{t('waiting')}</p>
+                <button onClick={() => setShowQr(true)} className="mt-5 text-xs font-semibold text-primary-700 underline">
+                  {t('preferApp')}
+                </button>
               </>
             ) : (
-              <p className="mt-6 text-sm text-mint-700">{t('demoNote')}</p>
+              <>
+                <p className="mt-2 text-sm text-gray-600">{t('oneQrBody')}</p>
+                {connectUrl && (
+                  <>
+                    <div className="mt-5 flex justify-center"><QRCodeSVG value={connectUrl} size={190} /></div>
+                    <p className="mt-3 text-xs font-semibold text-primary-700">{t('cameraHint')}</p>
+                    <p className="mt-3 text-xs text-gray-500">{t('waiting')}</p>
+                  </>
+                )}
+                <p className="mt-3 text-xs text-gray-400">
+                  {t('noWallet')}{' '}
+                  <a className="underline" href="https://wallet.socious.io/ios" target="_blank" rel="noreferrer">iOS</a>
+                  {' · '}
+                  <a className="underline" href="https://wallet.socious.io/android" target="_blank" rel="noreferrer">Android</a>
+                </p>
+                <button onClick={() => setShowQr(false)} className="mt-4 text-xs font-semibold text-primary-700 underline">
+                  {t('preferBrowser')}
+                </button>
+              </>
             )}
             <div className="mt-5 rounded-lg bg-gray-50 p-3 text-left text-xs text-gray-500">
               {t('kycPrereq')}
             </div>
-            <p className="mt-3 text-xs text-gray-400">
-              {t('noWallet')}{' '}
-              <a className="underline" href="https://wallet.socious.io/ios" target="_blank" rel="noreferrer">iOS</a>
-              {' · '}
-              <a className="underline" href="https://wallet.socious.io/android" target="_blank" rel="noreferrer">Android</a>
-            </p>
           </>
         )}
 

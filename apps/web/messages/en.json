@@ -53,7 +53,7 @@
   },
   "verify": {
     "title": "Verify with Socious Wallet",
-    "openWallet": "Open Socious Wallet",
+    "openWallet": "Open Socious Wallet (browser)",
     "waiting": "Waiting for your wallet…",
     "noWallet": "Don't have the wallet yet?",
     "demoNote": "Demo mode: your account will verify on the next check.",
@@ -61,8 +61,12 @@
     "error": "Something went wrong. Please try again.",
     "close": "Close",
     "cameraHint": "Scan with the Socious Wallet app (Scan tab)",
-    "oneQrBody": "Please download Socious Wallet and go through the KYC process — or use an existing SSI wallet with a KYC credential in it. Once you are verified, come back and scan this QR code with your Socious Wallet.",
-    "kycPrereq": "One scan proves two facts at once: you completed KYC, and you are over 18. Your name, documents and details never reach Moya — only a yes/no proof."
+    "oneQrBody": "Open the Socious Wallet app on your phone and scan this QR code with its Scan tab. If you haven't done KYC in the app yet, complete it first, then scan.",
+    "kycPrereq": "One scan proves two facts at once: you completed KYC, and you are over 18. Your name, documents and details never reach Moya — only a yes/no proof.",
+    "browserBody": "Verify with the Socious Wallet in your browser — no app needed. It opens in a new tab; if you haven't done identity verification (KYC) yet, it walks you through it first.",
+    "browserSteps": "In the wallet tab: accept the connection, complete KYC if asked, and approve the credential request. Then come back here.",
+    "preferApp": "Prefer the mobile app? Scan a QR code instead",
+    "preferBrowser": "Back to browser verification"
   },
   "phq9": {
     "progress": "Questions {from}–{to} of 9",

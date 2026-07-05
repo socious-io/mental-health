@@ -66,7 +66,7 @@ func verificationsGroup(r *gin.Engine) {
 			return
 		}
 		qrURL := "https://" + c.Request.Host + "/wallet/qr/" + v.ID.String()
-		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": qrURL})
+		c.JSON(http.StatusCreated, gin.H{"id": v.ID, "connect_url": qrURL, "wallet_url": walletURL})
 	})
 
 	g.GET("", func(c *gin.Context) {
