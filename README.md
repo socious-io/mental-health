@@ -44,8 +44,8 @@ go run ./cmd/app                     # api on :5070
 ## Catalyst milestones
 
 - **M1** — UX design & interactive Figma prototype ✅
-- **M2** — Anonymous account creation · anonymous reusable KYC · PHQ-9 screening & intelligent referral, live on a public domain
-- **M3** — Provider-issued treatment-need credentials · research/opportunity platform with escrowed token rewards on Cardano mainnet
+- **M2** — Anonymous account creation · anonymous reusable KYC · PHQ-9 screening & intelligent referral, live on a public domain ✅
+- **M3** — Provider-issued treatment-need credentials · research/opportunity platform with escrowed token rewards on Cardano mainnet ✅
 
 ## License
 
