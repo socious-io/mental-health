@@ -251,8 +251,24 @@ module.exports = {
   NETWORK, escrowScript, escrowAddress, provider, loadOrCreateWallet,
   walletAddressOffline, initiationDatum, activeDatum,
   recipientDepositRedeemer, cancelRedeemer, completeRedeemer,
-  initiate, bind, release,
+  initiate, bind, release, orgWalletInfo,
 };
+
+// The platform custodial "org" wallet that funds every study's escrow. Orgs
+// top it up by sending tADA to this address (Socious Wallet is identity-only
+// and cannot sign Cardano txns, so funding is a plain on-chain transfer).
+async function orgWalletInfo() {
+  const org = await loadOrCreateWallet('org');
+  const address = (await org.getUsedAddresses())[0] ?? (await org.getUnusedAddresses())[0];
+  let lovelace = '0';
+  try {
+    const bal = await org.getBalance();
+    lovelace = (bal.find((a) => a.unit === 'lovelace') || {}).quantity || '0';
+  } catch (e) {
+    // balance fetch is best-effort; address is always returned
+  }
+  return { address, lovelace };
+}
 
 // Simple payment from the org custodial wallet (funds admin/participant wallets
 // for fees + collateral on preprod).

@@ -19,6 +19,12 @@ export default function OrgConsole() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({ title_en: '', title_ja: '', reward_ada: 5, target_participants: 20, requires_treatment_need: false });
   const [busy, setBusy] = useState('');
+  const [escrow, setEscrow] = useState<{ enabled: boolean; address?: string; lovelace?: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const loadEscrow = useCallback(async () => {
+    try { setEscrow(await api('/portal/org/escrow')); } catch { /* payment off or runner down */ }
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -32,7 +38,7 @@ export default function OrgConsole() {
       setError((e as Error).message);
     }
   }, []);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); loadEscrow(); }, [load, loadEscrow]);
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +72,31 @@ export default function OrgConsole() {
       <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
       <p className="mt-2 text-sm text-gray-600">{t('subtitle')}</p>
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+      {escrow?.enabled && escrow.address && (
+        <div className="mt-6 rounded-xl border border-mint-200 bg-mint-50 p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-bold text-mint-900">{t('escrowWalletTitle')}</h2>
+            <span className="text-sm font-semibold text-mint-800">
+              {t('escrowBalance')}: {((Number(escrow.lovelace ?? '0')) / 1_000_000).toLocaleString()} tADA
+            </span>
+          </div>
+          <p className="mt-1.5 text-sm text-mint-800">{t('escrowFundBody')}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-mint-200 bg-white p-3">
+            <code className="flex-1 break-all font-mono text-xs text-gray-700">{escrow.address}</code>
+            <button
+              onClick={() => { navigator.clipboard?.writeText(escrow.address!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+              className="rounded-lg bg-mint-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-mint-700"
+            >
+              {copied ? t('escrowCopied') : t('escrowCopy')}
+            </button>
+            <button onClick={loadEscrow} className="rounded-lg border border-mint-300 px-3 py-1.5 text-xs font-semibold text-mint-700 hover:bg-mint-100">
+              {t('escrowRefresh')}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-mint-700">{t('escrowFundHint')}</p>
+        </div>
+      )}
 
       <form onSubmit={create} className="mt-6 grid gap-3 rounded-xl border border-gray-200 bg-white p-6 sm:grid-cols-2">
         <h2 className="font-bold text-gray-900 sm:col-span-2">{t('newStudy')}</h2>

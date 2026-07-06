@@ -229,6 +229,13 @@
     "released": "Reward released",
     "note": "Funding locks the reward at the escrow validator; release pays the participant from escrow. Both are public Cardano transactions.",
     "fundHint": "Publishing opens recruitment. Rewards are locked in the on-chain escrow per participant at the moment they join (one escrow box per participant) — no payment happens at publish time.",
-    "lockTx": "escrow lock ↗"
+    "lockTx": "escrow lock ↗",
+    "escrowWalletTitle": "Escrow funding wallet",
+    "escrowBalance": "Balance",
+    "escrowFundBody": "Study rewards are locked on-chain from this wallet when each participant joins. Top it up by sending tADA (Cardano preprod testnet) to the address below from any Cardano wallet.",
+    "escrowFundHint": "Rule of thumb: fund roughly (reward + 12 tADA) per expected participant to cover the reward, network fees and collateral. Balance updates a few minutes after your transfer confirms.",
+    "escrowCopy": "Copy address",
+    "escrowCopied": "Copied ✓",
+    "escrowRefresh": "Refresh"
   }
 }

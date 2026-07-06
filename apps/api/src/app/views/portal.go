@@ -104,6 +104,26 @@ func orgGroup(r *gin.Engine) {
 	g := r.Group("/portal/org")
 	g.Use(app.LoginRequired(), roleRequired("org"))
 
+	g.GET("/escrow", func(c *gin.Context) {
+		if !config.C.Payment.Enabled {
+			c.JSON(http.StatusOK, gin.H{"enabled": false})
+			return
+		}
+		var info struct {
+			Address  string `json:"address"`
+			Lovelace string `json:"lovelace"`
+		}
+		if err := app.ChainRunner("/wallets/org", gin.H{}, &info); err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"enabled":  true,
+			"address":  info.Address,
+			"lovelace": info.Lovelace,
+		})
+	})
+
 	g.GET("/studies", func(c *gin.Context) {
 		user := c.MustGet("user").(*models.User)
 		list, err := models.OrgStudies(user.ID)
